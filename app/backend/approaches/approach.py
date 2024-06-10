@@ -30,6 +30,8 @@ from text import nonewlines
 
 @dataclass
 class Document:
+    """Represents a document with its properties and metadata."""
+
     id: Optional[str]
     content: Optional[str]
     embedding: Optional[List[float]]
@@ -44,6 +46,7 @@ class Document:
     reranker_score: Optional[float] = None
 
     def serialize_for_results(self) -> dict[str, Any]:
+        """Serializes the document object for results."""
         return {
             "id": self.id,
             "content": self.content,
@@ -85,12 +88,45 @@ class Document:
 
 @dataclass
 class ThoughtStep:
+    """Represents a thought step with its title, description, and properties."""
+
     title: str
     description: Optional[Any]
     props: Optional[dict[str, Any]] = None
 
 
 class Approach(ABC):
+    """Abstract base class for different approaches.
+
+    This class serves as a base class for implementing different approaches in the Azure Search OpenAI demo application.
+    It provides common functionality and methods that can be used by the derived approach classes.
+
+    Args:
+        search_client (SearchClient): The search client used to interact with Azure Cognitive Search.
+        openai_client (AsyncOpenAI): The OpenAI client used to interact with the OpenAI API.
+        auth_helper (AuthenticationHelper): The authentication helper used to build security filters.
+        query_language (Optional[str]): The query language to be used for search queries.
+        query_speller (Optional[str]): The query speller to be used for search queries.
+        embedding_deployment (Optional[str]): The deployment name of the embedding model (not needed for non-Azure OpenAI or for retrieval_mode="text").
+        embedding_model (str): The name of the embedding model to be used.
+        embedding_dimensions (int): The number of dimensions for the embedding vectors.
+        openai_host (str): The host URL for the OpenAI API.
+        vision_endpoint (str): The endpoint URL for the Azure Computer Vision service.
+        vision_token_provider (Callable[[], Awaitable[str]]): A callable function that provides the access token for the Azure Computer Vision service.
+
+    Attributes:
+        search_client (SearchClient): The search client used to interact with Azure Cognitive Search.
+        openai_client (AsyncOpenAI): The OpenAI client used to interact with the OpenAI API.
+        auth_helper (AuthenticationHelper): The authentication helper used to build security filters.
+        query_language (Optional[str]): The query language to be used for search queries.
+        query_speller (Optional[str]): The query speller to be used for search queries.
+        embedding_deployment (Optional[str]): The deployment name of the embedding model (not needed for non-Azure OpenAI or for retrieval_mode="text").
+        embedding_model (str): The name of the embedding model to be used.
+        embedding_dimensions (int): The number of dimensions for the embedding vectors.
+        openai_host (str): The host URL for the OpenAI API.
+        vision_endpoint (str): The endpoint URL for the Azure Computer Vision service.
+        vision_token_provider (Callable[[], Awaitable[str]]): A callable function that provides the access token for the Azure Computer Vision service.
+    """
     def __init__(
         self,
         search_client: SearchClient,
@@ -118,6 +154,7 @@ class Approach(ABC):
         self.vision_token_provider = vision_token_provider
 
     def build_filter(self, overrides: dict[str, Any], auth_claims: dict[str, Any]) -> Optional[str]:
+        """Builds the filter based on the overrides and authentication claims."""
         exclude_category = overrides.get("exclude_category")
         security_filter = self.auth_helper.build_security_filters(overrides, auth_claims)
         filters = []
